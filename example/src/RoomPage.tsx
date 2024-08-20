@@ -118,11 +118,25 @@ const RoomView = ({ navigation }: RoomViewProps) => {
     { onlySubscribed: false }
   );
   const stableTracks = useVisualStableUpdate(tracks, 5);
+ //Local participant setup
+  const {
+    isCameraEnabled,
+    isMicrophoneEnabled,
+    isScreenShareEnabled,
+    localParticipant,
+  } = useLocalParticipant();
   // Setup views.
   const stageView = tracks.length > 0 && (
-    <ParticipantView trackRef={stableTracks[0]} style={styles.stage} />
+    <ParticipantView trackRef={stableTracks[1]} style={styles.stage} />
   );
-
+  // const stageView2 = stableTracks.length > 1 && (
+  //   <ParticipantView trackRef={stableTracks[1]} style={styles.otherParticipantsView} />
+  // );
+  useEffect(() => {
+    console.log("Stable Tracks Update:", stableTracks.length, stableTracks[0]?.participant?.identity)
+    
+  }, [stableTracks])
+  
   const renderParticipant: ListRenderItem<TrackReferenceOrPlaceholder> = ({
     item,
   }) => {
@@ -131,21 +145,15 @@ const RoomView = ({ navigation }: RoomViewProps) => {
     );
   };
 
-  const otherParticipantsView = stableTracks.length > 0 && (
+  const otherParticipantsView = stableTracks.length > 1 && (
     <FlatList
-      data={stableTracks}
+      data={[stableTracks[0]]}
       renderItem={renderParticipant}
       horizontal={true}
       style={styles.otherParticipantsList}
     />
   );
 
-  const {
-    isCameraEnabled,
-    isMicrophoneEnabled,
-    isScreenShareEnabled,
-    localParticipant,
-  } = useLocalParticipant();
 
   // Prepare for iOS screenshare.
   const screenCaptureRef = React.useRef(null);
@@ -166,6 +174,7 @@ const RoomView = ({ navigation }: RoomViewProps) => {
   return (
     <View style={styles.container}>
       {stageView}
+      {/* {stageView2} */}
       {otherParticipantsView}
       <RoomControls
         micEnabled={isMicrophoneEnabled}
@@ -251,5 +260,6 @@ const styles = StyleSheet.create({
   otherParticipantView: {
     width: 150,
     height: 150,
+    flexGrow: 0,
   },
 });
